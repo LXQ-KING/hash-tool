@@ -1,0 +1,17 @@
+{
+  "name": "hash-tool",
+  "version": "1.0.0",
+  "description": "哈希工具",
+  "main": "src/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron ."
+  },
+  "keywords": [],
+  "author": "LXQ",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^33.0.2",
+    "electron-reloader": "^1.2.3"
+  }
+}
