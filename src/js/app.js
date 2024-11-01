@@ -139,3 +139,41 @@ function toggleOnTop() {
   })
 }
 toggleOnTop()
+
+// 内容区
+const content = document.querySelector('.content')
+function initFileTextarea() {
+  // 初始化操作区
+  const operationBtn = content.children[0]
+  operationBtn.children[0].children[0].title = '追加所选文件'
+  operationBtn.children[0].children[1].title = '追加所选文件夹内所有文件'
+  operationBtn.children[1].title = '清空文件列表'
+  // 初始化文件列表
+  const fileTextarea = content.children[1]
+  const fileList = fileTextarea.children[1]
+  if (fileList.children.length > 0) {
+    fileList.style['margin-top'] = fileTextarea.children[0].offsetHeight + 'px'
+    fileList.children[0].title = fileList.children[0].textContent
+    fileList.children[1].title = fileList.children[1].textContent
+    fileList.children[2].title = fileList.children[2].textContent
+    const actionBtn = fileList.children[3]
+    actionBtn.children[0].title = '将文件哈希值作为原始哈希值'
+    actionBtn.children[1].title = '复制文件哈希值'
+    actionBtn.children[2].title = '查看文件哈希值详情'
+    actionBtn.children[3].title = '导出文件哈希值详情到指定文件'
+  }
+  // 初始化加密按钮
+  const encryptBtn = content.children[2]
+  encryptBtn.children[1].title = '计算所有文件对应的哈希值'
+}
+initFileTextarea()
+
+// 检验区
+const check = document.querySelector('.check')
+function initCheckArea() {
+  // 初始化中间区域
+  const hashTextarea = check.children[0]
+  hashTextarea.children[1].style['margin-top'] = hashTextarea.children[0].children[1].offsetTop + 'px'
+  hashTextarea.querySelector('.pk').title = '比较原始哈希值和目标哈希值'
+}
+initCheckArea()
