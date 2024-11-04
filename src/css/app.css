@@ -1,6 +1,11 @@
-body {
-  display: flex;
-  flex-direction: column;
+/* CSS变量 */
+:root {
+  /* 头部栏和底部栏的层级 */
+  --headerAndFooter-z-index: 99;
+  /* 覆盖层的层级 */
+  --wrapper-z-index: 100;
+  /* 弹窗的层级 */
+  --dialog-z-index: 101;
 }
 
 /* 头部 */
@@ -11,6 +16,11 @@ body {
   height: 32px;
   background-color: #333;
   line-height: 32px;
+  user-select: none;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: var(--headerAndFooter-z-index);
 }
 /* 菜单 */
 .header .menu {
@@ -27,7 +37,6 @@ body {
   position: absolute;
   left: 0;
   top: 31px;
-  z-index: 999;
   display: block;
   text-align: left;
   display: none;
@@ -56,6 +65,7 @@ body {
 .header .icon {
   display: flex;
   align-items: center;
+  cursor: pointer;
 }
 .header .icon img {
   margin-right: 10px;
@@ -69,14 +79,18 @@ body {
 
 /* 主体 */
 .body {
-  flex: 1;
-  margin: 10px 15px;
+  position: absolute;
+  left: 0px;
+  top: 32px;
+  padding: 10px 15px;
+  width: 100%;
+  height: calc(100% - 48px);
+  user-select: none;
+  overflow: auto;
 }
 /* 内容区 */
 .body .content {
   height: 50%;
-  display: flex;
-  flex-direction: column;
 }
 /* 操作区 */
 .content .operation {
@@ -89,25 +103,23 @@ body {
 .content .selector .file {
   margin-right: 10px;
 }
-.content .selector .file input[type="file"],
+/* .content .selector .file input[type="file"],
 .content .selector .directory input[type="file"] {
   display: none;
-}
+} */
 /* 文件列表 */
 .content .file-list {
-  flex: 1;
   margin: 10px 0;
   border: 1px solid #000;
   border-radius: 3px;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 75%;
 }
 /* 标题栏 */
 .content .file-list .title {
-  position: absolute;
-  left: 0;
-  top: 0;
   display: flex;
-  /* justify-content: space-around; */
   border-bottom: 1px solid rgba(0, 0, 0, 0.5);
   padding: 3px 0;
   width: 100%;
@@ -120,20 +132,29 @@ body {
 /* 文件内容 */
 .content .file-list .files {
   padding: 5px 10px;
-  display: flex;
+  flex: 1;
+  overflow: auto;
 }
-.content .file-list .files > div {
+.content .file-list .files:focus-visible {
+  outline: 1px auto #000;
+}
+.content .file-list .files .line {
+  display: flex;
+  margin-bottom: 5px;
+}
+.content .file-list .files .line > div {
+  padding: 0 5px;
   width: 25%;
   text-align: center;
-  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  overflow: hidden;
 }
-.content .file-list .files .actions {
+.content .file-list .files .line .actions {
   display: flex;
   justify-content: space-evenly;
 }
-.content .file-list .files .btn {
+.content .file-list .files .line .btn {
   width: 20%;
   padding: 0;
   text-align: center;
@@ -148,6 +169,14 @@ body {
   flex: 1;
   display: flex;
   align-items: center;
+}
+.content .encrypt .btn img {
+  display: none;
+  width: 16px;
+  height: 16px;
+  text-align: center;
+  vertical-align: middle;
+  /* animation: loading 1s linear infinite; */
 }
 /* 检验区 */
 .body .check {
@@ -204,4 +233,46 @@ body {
   color: rgba(255, 255, 255, 0.5);
   text-align: center;
   line-height: 16px;
+  user-select: none;
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  z-index: var(--headerAndFooter-z-index);
+}
+
+/* 加载转圈效果 */
+.loading div {
+  display: none;
+  position: absolute;
+  left: calc(50% - 50px);
+  top: calc(50% - 50px);
+  border: 3px solid #000;
+  border-top-color: rgba(0, 0, 0, 0.2);
+  border-right-color: rgba(0, 0, 0, 0.2);
+  border-bottom-color: rgba(0, 0, 0, 0.2);
+  border-radius: 50%;
+  width: 100px;
+  height: 100px;
+  /* background-color: rgba(0, 0, 255, 0.5); */
+  animation: loading 1s ease infinite;
+}
+/* 关于弹窗 */
+.about {
+  display: none;
+}
+.about .dialog-title img {
+  width: 120px;
+  height: 120px;
+}
+.about .dialog-content .github {
+  cursor: pointer;
+}
+
+/* 详情弹窗 */
+.detail {
+  display: none;
+}
+.detail .dialog-title {
+  font-size: 16px;
+  font-weight: 700;
 }

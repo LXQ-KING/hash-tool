@@ -24,8 +24,10 @@ menu.addEventListener('click', e => {
       const context = target.textContent
       switch (context) {
         case '导入文件':
+          document.querySelector('.content .selector .file').click()
           break
         case '导入文件夹':
+          document.querySelector('.content .selector .directory').click()
           break
         case '导出为...':
           break
@@ -72,12 +74,34 @@ menu.addEventListener('click', e => {
           api.openExternalLink('https://github.com/LXQ-KING/hash-tool')
           break
         case '关于':
+          document.querySelector('.about').style.display = 'block'
+          document.querySelector('.about .dialog').style.display = 'block'
+          const aboutValue = document.querySelector('.about .dialog-content ul:last-child')
+          aboutValue.children[0].textContent = packageJson.description
+          aboutValue.children[1].textContent = packageJson.version
+          aboutValue.children[2].textContent = packageJson.author
+          // about.querySelector('.dialog-content ul:first-child').style.width = getComputedStyle(about.querySelector('.dialog-content ul:last-child')).width
           break
         default:
           break
       }
     }
   }
+})
+document.querySelector('.about').addEventListener('click', e => {
+  if (e.target.classList.contains('about')) {
+    document.querySelector('.about').style.display = 'none'
+    document.querySelector('.about .dialog').style.display = 'none'
+  }
+})
+document.querySelector('.about .close').addEventListener('click', e => {
+  if (e.target.tagName === 'IMG') {
+    e.target.parentNode.parentNode.style.display = 'none'
+    e.target.parentNode.parentNode.parentNode.style.display = 'none'
+  }
+})
+document.querySelector('.about .dialog-content .github').addEventListener('click', () => {
+  api.openExternalLink(e.target.textContent)
 })
 // 初始化下拉菜单
 function initMenuList() {
@@ -87,7 +111,7 @@ function initMenuList() {
     if (list[0].classList.contains('view')) {
       const windowInfo = api.window
       api.getWindowInfo().then(info => {
-        list[0].children[2].textContent = info.isMaximized ?  '取消全屏' : '切换全屏'
+        list[0].children[2].textContent = info.isMaximized ? '取消全屏' : '切换全屏'
         list[0].children[3].textContent = info.isAlwaysOnTop ? '取消保持窗口在最前端' : '保持窗口在最前端'
         list[0].children[4].textContent = info.isDevToolsOpened ? '取消开发者工具' : '打开开发者工具'
       })
@@ -150,23 +174,132 @@ function initFileTextarea() {
   operationBtn.children[1].title = '清空文件列表'
   // 初始化文件列表
   const fileTextarea = content.children[1]
-  const fileList = fileTextarea.children[1]
-  if (fileList.children.length > 0) {
-    fileList.style['margin-top'] = fileTextarea.children[0].offsetHeight + 'px'
-    fileList.children[0].title = fileList.children[0].textContent
-    fileList.children[1].title = fileList.children[1].textContent
-    fileList.children[2].title = fileList.children[2].textContent
-    const actionBtn = fileList.children[3]
-    actionBtn.children[0].title = '将文件哈希值作为原始哈希值'
-    actionBtn.children[1].title = '复制文件哈希值'
-    actionBtn.children[2].title = '查看文件哈希值详情'
-    actionBtn.children[3].title = '导出文件哈希值详情到指定文件'
-  }
   // 初始化加密按钮
   const encryptBtn = content.children[2]
   encryptBtn.children[1].title = '计算所有文件对应的哈希值'
 }
 initFileTextarea()
+// 导入文件
+const files = []
+document.querySelector('.content .selector .file').addEventListener('click', async () => {
+  const result = await api.selectFile()
+  if (result.canceld) {
+    console.log('取消选择文件')
+  } else {
+    addFiles(result.files)
+  }
+})
+document.querySelector('.content .selector .directory').addEventListener('click', async () => {
+  const result = await api.selectFolder()
+  if (result.canceld) {
+    console.log('取消选择文件夹')
+  } else {
+    addFiles(result.files)
+  }
+})
+api.onToggleLoading(show => {
+  const loading = document.querySelector('.loading')
+  const loadingIcon = document.querySelector('.loading div')
+  if (show) {
+    loading.style.display = 'block'
+    loadingIcon.style.display = 'block'
+  } else {
+    loading.style.display = 'none'
+    loadingIcon.style.display = 'none'
+  }
+})
+// 追加文件
+function addFiles(selectedFiles) {
+  const filePaths = getFilePaths(files)
+  const fileList = selectedFiles.filter(file => {
+    if (filePaths.includes(file.filePath)) return false
+    const div = document.createElement('div')
+    div.classList.add('line')
+    div.innerHTML = `
+    <div class="path" title="${file.filePath}">${file.filePath}</div>
+    <div class="name" title="${file.fileName}">${file.fileName} </div>
+    <div class="hash"></div>
+    <div class="actions">
+      <div class="btn" title="将文件哈希值作为原始哈希值">检验</div>
+      <div class="btn" title="复制文件哈希值">复制</div>
+      <div class="btn" title="查看文件哈希值详情">详情</div>
+      <div class="btn" title="导出文件哈希值详情到指定文件">导出</div>
+    </div>
+    `
+    document.querySelector('.content .file-list .files').appendChild(div)
+    return file
+  })
+  files.push(...fileList)
+  document.querySelector('.loading').style.display = 'none'
+  document.querySelector('.loading div').style.display = 'none'
+}
+function getFilePaths(fileList) {
+  return fileList.map(file => file.filePath)
+}
+// 点击文件列表操作按钮
+document.querySelector('.content .file-list .files').addEventListener('click', e => {
+  const target = e.target
+  if (target.classList.contains('btn')) {
+    const content = target.textContent
+    switch (content) {
+      case '检验':
+        document.querySelector('.check .hash-value .origin textarea').value = target.parentNode.previousElementSibling.textContent
+        document.querySelector('.check .message').textContent = ''
+        break
+      case '复制':
+        navigator.clipboard.writeText(target.parentNode.previousElementSibling.textContent).then(() => {
+          console.log('复制成功')
+        }).catch(error => {
+          console.log('复制失败', error.message)
+        })
+        break
+      case '详情':
+        document.querySelector('.detail').style.display = 'block'
+        document.querySelector('.detail .dialog').style.display = 'block'
+        const dialogContent = document.querySelector('.detail .dialog-content ul:last-child')
+        break
+      case '导出':
+        break
+      default:
+        break
+    }
+  }
+})
+document.querySelector('.detail').addEventListener('click', e => {
+  if (e.target.classList.contains('detail')) {
+    document.querySelector('.detail').style.display = 'none'
+    document.querySelector('.detail .dialog').style.display = 'none'
+  }
+})
+document.querySelector('.detail .close').addEventListener('click', e => {
+  if (e.target.tagName === 'IMG') {
+    e.target.parentNode.parentNode.style.display = 'none'
+    e.target.parentNode.parentNode.parentNode.style.display = 'none'
+  }
+})
+// 清空文件列表
+document.querySelector('.content .operation .reset').addEventListener('click', () => {
+  document.querySelector('.content .file-list .files').innerHTML = ''
+  files.length = 0
+  document.querySelector('.content .file-list .title span').textContent = ''
+})
+// 计算哈希值
+document.querySelector('.content .encrypt .btn').addEventListener('click', () => {
+  const loading = document.querySelector('.content .encrypt .btn img')
+  loading.style.display = 'inline'
+  loading.style.animation = 'loading 1s linear infinite'
+  const algorithm = document.querySelector('.content .encrypt .algorithm select').value
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i]
+    const hash = api.calculateHash(algorithm, file.content)
+    const fileElement = document.querySelector(`.content .file-list .files .line:nth-child(${i + 1})`)
+    const hashElement = fileElement.querySelector('.hash')
+    hashElement.textContent = hash
+    hashElement.title = hash
+    document.querySelector('.content .file-list .title span').textContent = `（${algorithm}）`
+  }
+  loading.style.display = 'none'
+})
 
 // 检验区
 const check = document.querySelector('.check')
@@ -177,3 +310,23 @@ function initCheckArea() {
   hashTextarea.querySelector('.pk').title = '比较原始哈希值和目标哈希值'
 }
 initCheckArea()
+// 哈希值比较
+document.querySelector('.check .hash-value .compare .pk').addEventListener('click', () => {
+  const message = document.querySelector('.check .message')
+  const origin = document.querySelector('.check .hash-value .origin textarea').value
+  const target = document.querySelector('.check .hash-value .target textarea').value
+  if (origin === '' || target === '') return
+  if (origin === target) {
+    message.style.color = 'green'
+    message.textContent = '哈希值相同'
+  } else {
+    message.style.color = 'red'
+    message.textContent = '哈希值不同'
+  }
+})
+document.querySelector('.check .hash-value .origin textarea').addEventListener('input', e => {
+  document.querySelector('.check .message').textContent = ''
+})
+document.querySelector('.check .hash-value .target textarea').addEventListener('input', e => {
+  document.querySelector('.check .message').textContent = ''
+})

@@ -1,5 +1,6 @@
-const { app, BrowserWindow, Menu, ipcMain } = require('electron')
+const { app, BrowserWindow, Menu, ipcMain, dialog } = require('electron')
 const path = require('path')
+const fs = require('fs')
 
 // 热加载模块
 try {
@@ -85,6 +86,60 @@ const createWindow = () => {
         break
     }
   });
+
+  ipcMain.handle('select-file', async e => {
+    const { canceld, filePaths } = await dialog.showOpenDialog(win, {
+      title: '选择文件',
+      properties: ['openFile', 'multiSelections'],
+      modal: true
+    })
+    if (!filePaths.length || canceld) {
+      return { canceld: true, files: [] }
+    } else {
+      e.sender.send('toggle-loading', true)
+      const files = filePaths.map(filePath => {
+        const content = fs.readFileSync(filePath, 'utf8')
+        const fileName = path.basename(filePath)
+        return { filePath, fileName, content }
+      })
+      return { canceld: false, files }
+    }
+  })
+  
+  ipcMain.handle('select-folder', async e => {
+    const { canceld, filePaths } = await dialog.showOpenDialog(win, {
+      title: '选择文件夹',
+      properties: ['openDirectory'],
+      modal: true
+    })
+    if (!filePaths.length || canceld) {
+      return { canceld: true, files: [] }
+    } else {
+      e.sender.send('toggle-loading', true)
+      const filePath = filePaths[0]
+      // let files = []
+      const files = readFolder(filePath)
+      return { canceld: false, files }
+    }
+  })
+}
+
+function readFolder(folderPath) {
+  let files = []
+  function readDirRecursive(folderPath) {
+    const items = fs.readdirSync(folderPath)
+    items.forEach(item => {
+      const fullPath = path.join(folderPath, item)
+      const stats = fs.statSync(fullPath)
+      if (stats.isDirectory()) {
+        readDirRecursive(fullPath)
+      } else {
+        files.push({ filePath: fullPath, fileName: item, content: fs.readFileSync(fullPath, 'utf8') })
+      }
+    })
+  }
+  readDirRecursive(folderPath)
+  return files
 }
 
 // 加载窗口

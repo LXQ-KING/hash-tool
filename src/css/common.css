@@ -8,6 +8,7 @@
   border-radius: 3px;
   padding: 2px 3px;
   background-color: #efefef;
+  cursor: pointer;
 }
 .btn:hover {
   background-color: #e5e5e5;
@@ -33,9 +34,64 @@ textarea:focus-visible {
   outline: 1px auto #000;
 }
 
-.sucess {
-  color: green;
+@keyframes loading {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
-.error {
-  color: red;
+
+.wrapper {
+  display: none;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: var(--wrapper-z-index);
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.dialog {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 5px;
+  padding: 10px;
+  background-color: white;
+}
+.dialog .close {
+  text-align: right;
+}
+.dialog .close img {
+  cursor: pointer;
+  padding: 3px;
+  width: 21px;
+  height: 21px;
+}
+.dialog .close img:hover {
+  border-radius: 50%;
+  background-color: #00000010;
+}
+.dialog .dialog-title {
+  text-align: center;
+}
+.dialog .dialog-content {
+  display: flex;
+  margin: 15px 20px;
+}
+.dialog .dialog-content ul:first-child {
+  text-align: right;
+  white-space: nowrap;
+}
+.dialog .dialog-content ul:last-child {
+  text-align: left;
+  white-space: nowrap;
+}
+.dialog .dialog-content ul li {
+  height: 20px;
+  line-height: 20px;
 }
