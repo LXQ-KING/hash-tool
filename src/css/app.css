@@ -6,6 +6,8 @@
   --wrapper-z-index: 100;
   /* 弹窗的层级 */
   --dialog-z-index: 101;
+  /* 消息提示框的层级 */
+  --messageBox-z-index: 102;
 }
 
 /* 头部 */
@@ -100,13 +102,16 @@
 .content .operation .selector {
   flex: 1;
 }
-.content .selector .file {
+.content .selector label {
   margin-right: 10px;
 }
 /* .content .selector .file input[type="file"],
 .content .selector .directory input[type="file"] {
   display: none;
 } */
+.content .operation .selector .export {
+  display: none;
+}
 /* 文件列表 */
 .content .file-list {
   margin: 10px 0;
@@ -266,6 +271,10 @@
 }
 .about .dialog-content .github {
   cursor: pointer;
+}
+.about .dialog-content .github:hover {
+  color: blue;
+  text-decoration: underline;
 }
 
 /* 详情弹窗 */

@@ -1,6 +1,7 @@
 const { app, BrowserWindow, Menu, ipcMain, dialog } = require('electron')
 const path = require('path')
 const fs = require('fs')
+const { get } = require('http')
 
 // 热加载模块
 try {
@@ -93,15 +94,15 @@ const createWindow = () => {
       properties: ['openFile', 'multiSelections'],
       modal: true
     })
-    if (!filePaths.length || canceld) {
+    if (canceld || !filePaths.length) {
       return { canceld: true, files: [] }
     } else {
       e.sender.send('toggle-loading', true)
-      const files = filePaths.map(filePath => {
+      const files = await Promise.all(filePaths.map(filePath => {
         const content = fs.readFileSync(filePath, 'utf8')
         const fileName = path.basename(filePath)
         return { filePath, fileName, content }
-      })
+      }))
       return { canceld: false, files }
     }
   })
@@ -112,7 +113,7 @@ const createWindow = () => {
       properties: ['openDirectory'],
       modal: true
     })
-    if (!filePaths.length || canceld) {
+    if (canceld ||!filePaths.length) {
       return { canceld: true, files: [] }
     } else {
       e.sender.send('toggle-loading', true)
@@ -122,13 +123,44 @@ const createWindow = () => {
       return { canceld: false, files }
     }
   })
+
+  ipcMain.handle('select-download-file', async (e, downFile) => {
+    defaultFileName = path.basename(downFile)
+    const { canceld, filePath } = await dialog.showSaveDialog(win, {
+      title: '下载文件',
+      properties: ['openFile'],
+      defaultPath: defaultFileName ? defaultFileName.replace(path.extname(defaultFileName), '') + '-哈希值' : defaultFileName.replace(path.extname(defaultFileName), '') + '哈希值',
+      filters: [
+        { name: 'Text Files', extensions: ['txt'] },
+        { name: 'All Files', extensions: ['*'] }
+      ],
+      modal: true
+    })
+    if (canceld || !filePath) {
+      return { canceld: true, files: {} }
+    } else {
+      e.sender.send('toggle-loading', true)
+      const content = defaultFileName ? e.sender.send('get-download-content', filePath, downFile) : e.sender.send('get-download-content', filePath, 'all')
+      const file = {
+        filePath: filePath,
+        fileName: path.basename(filePath)
+      }
+      return { canceld: false, file }
+    }
+  })
+
+  ipcMain.on('download-content', (e, filePath, data) => {
+    fs.writeFileSync(filePath, data)
+    // e.sender.send('toggle-loading', false)
+    e.sender.send('download-file-result', true)
+  })
 }
 
 function readFolder(folderPath) {
   let files = []
-  function readDirRecursive(folderPath) {
+  async function readDirRecursive(folderPath) {
     const items = fs.readdirSync(folderPath)
-    items.forEach(item => {
+    await Promise.all(items.forEach(item => {
       const fullPath = path.join(folderPath, item)
       const stats = fs.statSync(fullPath)
       if (stats.isDirectory()) {
@@ -136,7 +168,7 @@ function readFolder(folderPath) {
       } else {
         files.push({ filePath: fullPath, fileName: item, content: fs.readFileSync(fullPath, 'utf8') })
       }
-    })
+    }))
   }
   readDirRecursive(folderPath)
   return files

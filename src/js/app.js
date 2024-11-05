@@ -5,7 +5,7 @@ document.head.querySelector('title').textContent = packageJson.description + ' v
 // 头部
 // 菜单
 const menu = document.querySelector('.header .menu')
-menu.addEventListener('click', e => {
+menu.addEventListener('click', async e => {
   e.stopPropagation()
   const target = e.target
   if (target.tagName === 'P') {
@@ -30,6 +30,13 @@ menu.addEventListener('click', e => {
           document.querySelector('.content .selector .directory').click()
           break
         case '导出为...':
+          const file = await api.selectDownloadFile('')
+          if (!file.canceld) {
+            // document.querySelector('.loading').style.display = 'none'
+            // document.querySelector('.loading div').style.display = 'none'
+          } else {
+            createMessage('info', '取消导出')
+          }
           break
         case '退出':
           api.operateWindow('close')
@@ -68,10 +75,10 @@ menu.addEventListener('click', e => {
           target.textContent = '打开开发者工具'
           break
         case '帮助文档':
-          api.openExternalLink('https://github.com/LXQ-KING/hash-tool/blob/master/README.md')
+          api.openExternalLink(GITHUB_HELP_URL)
           break
         case 'GitHub仓库':
-          api.openExternalLink('https://github.com/LXQ-KING/hash-tool')
+          api.openExternalLink(GITHUB_URL)
           break
         case '关于':
           document.querySelector('.about').style.display = 'block'
@@ -80,6 +87,8 @@ menu.addEventListener('click', e => {
           aboutValue.children[0].textContent = packageJson.description
           aboutValue.children[1].textContent = packageJson.version
           aboutValue.children[2].textContent = packageJson.author
+          aboutValue.children[3].textContent = EMAIL
+          aboutValue.children[4].textContent = GITHUB_URL
           // about.querySelector('.dialog-content ul:first-child').style.width = getComputedStyle(about.querySelector('.dialog-content ul:last-child')).width
           break
         default:
@@ -100,7 +109,7 @@ document.querySelector('.about .close').addEventListener('click', e => {
     e.target.parentNode.parentNode.parentNode.style.display = 'none'
   }
 })
-document.querySelector('.about .dialog-content .github').addEventListener('click', () => {
+document.querySelector('.about .dialog-content .github').addEventListener('click', e => {
   api.openExternalLink(e.target.textContent)
 })
 // 初始化下拉菜单
@@ -171,6 +180,7 @@ function initFileTextarea() {
   const operationBtn = content.children[0]
   operationBtn.children[0].children[0].title = '追加所选文件'
   operationBtn.children[0].children[1].title = '追加所选文件夹内所有文件'
+  operationBtn.children[0].children[2].title = '导出所有文件哈希值详情到指定文件'
   operationBtn.children[1].title = '清空文件列表'
   // 初始化文件列表
   const fileTextarea = content.children[1]
@@ -184,7 +194,7 @@ const files = []
 document.querySelector('.content .selector .file').addEventListener('click', async () => {
   const result = await api.selectFile()
   if (result.canceld) {
-    console.log('取消选择文件')
+    createMessage('info', '取消选择文件')
   } else {
     addFiles(result.files)
   }
@@ -192,9 +202,18 @@ document.querySelector('.content .selector .file').addEventListener('click', asy
 document.querySelector('.content .selector .directory').addEventListener('click', async () => {
   const result = await api.selectFolder()
   if (result.canceld) {
-    console.log('取消选择文件夹')
+    createMessage('info', '取消选择文件夹')
   } else {
     addFiles(result.files)
+  }
+})
+document.querySelector('.content .selector .export').addEventListener('click', async () => {
+  const file = await api.selectDownloadFile('')
+  if (!file.canceld) {
+    // document.querySelector('.loading').style.display = 'none'
+    // document.querySelector('.loading div').style.display = 'none'
+  } else {
+    createMessage('info', '取消导出全部文件')
   }
 })
 api.onToggleLoading(show => {
@@ -211,6 +230,7 @@ api.onToggleLoading(show => {
 // 追加文件
 function addFiles(selectedFiles) {
   const filePaths = getFilePaths(files)
+  let fileExists = true
   const fileList = selectedFiles.filter(file => {
     if (filePaths.includes(file.filePath)) return false
     const div = document.createElement('div')
@@ -227,44 +247,96 @@ function addFiles(selectedFiles) {
     </div>
     `
     document.querySelector('.content .file-list .files').appendChild(div)
+    fileExists = false
     return file
   })
   files.push(...fileList)
+  document.querySelector('.content .operation .selector .export').style.display = 'inline-block'
   document.querySelector('.loading').style.display = 'none'
   document.querySelector('.loading div').style.display = 'none'
+  if (fileExists) {
+    createMessage('warn', '文件已存在，请勿重复导入')
+  } else {
+    createMessage('right', '导入成功')
+  }
 }
 function getFilePaths(fileList) {
   return fileList.map(file => file.filePath)
 }
 // 点击文件列表操作按钮
-document.querySelector('.content .file-list .files').addEventListener('click', e => {
+document.querySelector('.content .file-list .files').addEventListener('click', async e => {
   const target = e.target
   if (target.classList.contains('btn')) {
     const content = target.textContent
+    const fileLine = target.parentNode.parentNode
     switch (content) {
       case '检验':
         document.querySelector('.check .hash-value .origin textarea').value = target.parentNode.previousElementSibling.textContent
         document.querySelector('.check .message').textContent = ''
+        if (!target.parentNode.previousElementSibling.textContent) {
+          createMessage('warn', '未计算文件哈希值')
+        } else {
+          createMessage('right', '已将Hash值复制到原始哈希值区域')
+        }
         break
       case '复制':
         navigator.clipboard.writeText(target.parentNode.previousElementSibling.textContent).then(() => {
-          console.log('复制成功')
+          if (!target.parentNode.previousElementSibling.textContent) {
+            createMessage('warn', '未计算文件哈希值')
+          } else {
+            createMessage('right', '复制成功')
+          }
         }).catch(error => {
-          console.log('复制失败', error.message)
+          createMessage('error', '复制失败')
         })
         break
       case '详情':
         document.querySelector('.detail').style.display = 'block'
         document.querySelector('.detail .dialog').style.display = 'block'
-        const dialogContent = document.querySelector('.detail .dialog-content ul:last-child')
+        const dialogContent1 = document.querySelector('.detail .dialog-content ul:first-child')
+        const dialogContent2 = document.querySelector('.detail .dialog-content ul:last-child')
+        dialogContent2.children[0].textContent = fileLine.children[0].textContent
+        dialogContent2.children[1].textContent = fileLine.children[1].textContent
+        /* if (fileLine.children[2].textContent) {
+          dialogContent2.children[2].textContent = fileLine.children[2].textContent
+          dialogContent2.children[2].style.color = '#000'
+          if (dialogContent1.querySelector('hashDetail')) {
+            dialogContent2.querySelector('hashDetail').textContent = fileLine.parentNode.parentNode.querySelector('.title span').textContent.replace('（', '').replace('）', '')
+          } else {
+            const nameDiv = document.createElement('li')
+            nameDiv.classList.add('hashDetail')
+            nameDiv.textContent = '哈希算法：'
+            dialogContent1.insertBefore(nameDiv, dialogContent1.children[2])
+            const valueDiv = document.createElement('li')
+            valueDiv.classList.add('hashDetail')
+            valueDiv.textContent = fileLine.parentNode.parentNode.querySelector('.title span').textContent.replace('（', '').replace('）', '')
+            dialogContent2.insertBefore(valueDiv, dialogContent2.children[2])
+          }
+        } else {
+          if (dialogContent1.querySelector('hashDetail')) {
+            dialogContent1.querySelector('hashDetail').remove()
+            dialogContent2.querySelector('hashDetail').remove()
+          }
+          dialogContent2.children[2].textContent = '未计算哈希值'
+          dialogContent2.children[2].style.color = 'red'
+        } */
         break
       case '导出':
+        const filePath = fileLine.children[0].textContent
+        const file = await api.selectDownloadFile(fileLine.children[0].textContent)
+        if (!file.canceld) {
+          // document.querySelector('.loading').style.display = 'none'
+          // document.querySelector('.loading div').style.display = 'none'
+        } else {
+          createMessage('info', '取消导出所选文件')
+        }
         break
       default:
         break
     }
   }
 })
+// 文件哈希值详情弹窗
 document.querySelector('.detail').addEventListener('click', e => {
   if (e.target.classList.contains('detail')) {
     document.querySelector('.detail').style.display = 'none'
@@ -277,11 +349,53 @@ document.querySelector('.detail .close').addEventListener('click', e => {
     e.target.parentNode.parentNode.parentNode.style.display = 'none'
   }
 })
+// 导出文件哈希值详情
+api.onDownloadFile((filePath, downFile) => {
+  const fileLines = document.querySelectorAll('.content .file-list .files .line')
+  let result = ''
+  let all = ''
+  const algorithm = document.querySelector('.content .file-list .title span').textContent.replace('（', '').replace('）', '')
+  fileLines.forEach(line => {
+    if (line.children[2].textContent) {
+      all += `文件路径：${line.children[0].textContent}\n文件名：${line.children[1].textContent}\n哈希算法：${algorithm}\n哈希值：${line.children[2].textContent}\n\n`
+    } else {
+      all += `文件路径：${line.children[0].textContent}\n文件名：${line.children[1].textContent}\n哈希值：未计算\n\n`
+    }
+    if (line.children[0].textContent === downFile) {
+      if (line.children[2].textContent) {
+        result = `文件路径：${line.children[0].textContent}\n文件名：${line.children[1].textContent}\n哈希算法：${algorithm}\n哈希值：${line.children[2].textContent}`
+      } else {
+        result = `文件路径：${line.children[0].textContent}\n文件名：${line.children[1].textContent}\n哈希值：未计算`
+      }
+    }
+  })
+  if (downFile) {
+    result = downFile === 'all' ? all : result
+  }
+  if (fileLines.length > 0) {
+    api.sendDownloadContent(filePath, result)
+  } else {
+    document.querySelector('.loading').style.display = 'none'
+    document.querySelector('.loading div').style.display = 'none'
+    createMessage('warn', '没有可导出的文件')
+  }
+})
+api.onDownloadResponse(idDownloaded => {
+  if (idDownloaded) {
+    createMessage('right', '导出成功')
+  } else {
+    createMessage('error', '导出失败')
+  }
+  document.querySelector('.loading').style.display = 'none'
+  document.querySelector('.loading div').style.display = 'none'
+})
 // 清空文件列表
 document.querySelector('.content .operation .reset').addEventListener('click', () => {
   document.querySelector('.content .file-list .files').innerHTML = ''
   files.length = 0
   document.querySelector('.content .file-list .title span').textContent = ''
+  document.querySelector('.content .operation .selector .export').style.display = 'none'
+  createMessage('right', '重置成功')
 })
 // 计算哈希值
 document.querySelector('.content .encrypt .btn').addEventListener('click', () => {
@@ -299,6 +413,7 @@ document.querySelector('.content .encrypt .btn').addEventListener('click', () =>
     document.querySelector('.content .file-list .title span').textContent = `（${algorithm}）`
   }
   loading.style.display = 'none'
+  createMessage('right', 'Hash值计算成功')
 })
 
 // 检验区
@@ -315,13 +430,24 @@ document.querySelector('.check .hash-value .compare .pk').addEventListener('clic
   const message = document.querySelector('.check .message')
   const origin = document.querySelector('.check .hash-value .origin textarea').value
   const target = document.querySelector('.check .hash-value .target textarea').value
-  if (origin === '' || target === '') return
+  if (origin === '' && target === '') {
+    createMessage('warn', '原始哈希值和目标哈希值不能为空')
+    return
+  } else if (origin === '') {
+    createMessage('warn', '原始哈希值不能为空')
+    return
+  } else if (target === '') {
+    createMessage('warn', '目标哈希值不能为空')
+    return
+  }
   if (origin === target) {
     message.style.color = 'green'
     message.textContent = '哈希值相同'
+    createMessage('right', '比较成功，哈希值相同')
   } else {
     message.style.color = 'red'
     message.textContent = '哈希值不同'
+    createMessage('error', '比较失败，哈希值不同')
   }
 })
 document.querySelector('.check .hash-value .origin textarea').addEventListener('input', e => {
@@ -330,3 +456,6 @@ document.querySelector('.check .hash-value .origin textarea').addEventListener('
 document.querySelector('.check .hash-value .target textarea').addEventListener('input', e => {
   document.querySelector('.check .message').textContent = ''
 })
+
+// 底部栏
+document.querySelector('.footer div').textContent = EMAIL
