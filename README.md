@@ -1,4 +1,4 @@
- ## 主界面：
+ ## 主界面
 
 ![interface](src/assets/images/interface.png)
 

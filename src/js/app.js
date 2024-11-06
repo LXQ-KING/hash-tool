@@ -379,10 +379,14 @@ api.onDownloadResponse(idDownloaded => {
 // 清空文件列表
 document.querySelector('.content .operation .reset').addEventListener('click', () => {
   document.querySelector('.content .file-list .files').innerHTML = ''
-  files.length = 0
   document.querySelector('.content .file-list .title span').textContent = ''
   document.querySelector('.content .operation .selector .export').style.display = 'none'
-  createMessage('right', '重置成功')
+  if (files.length > 0) {
+    files.length = 0
+    createMessage('right', '重置成功')
+  } else {
+    createMessage('warn', '没有可清空的文件')
+  }
 })
 // 计算哈希值
 document.querySelector('.content .encrypt .btn').addEventListener('click', () => {
@@ -400,7 +404,11 @@ document.querySelector('.content .encrypt .btn').addEventListener('click', () =>
     document.querySelector('.content .file-list .title span').textContent = `（${algorithm}）`
   }
   loading.style.display = 'none'
-  createMessage('right', 'Hash值计算成功')
+  if (files.length > 0) {
+    createMessage('right', 'Hash值计算成功')
+  } else {
+    createMessage('warn', '还未导入文件，没有可计算的Hash值')
+  }
 })
 
 // 检验区
