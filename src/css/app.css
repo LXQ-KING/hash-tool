@@ -284,4 +284,6 @@
 .detail .dialog-title {
   font-size: 16px;
   font-weight: 700;
+  width: 100%;
+  line-height: 20px;
 }

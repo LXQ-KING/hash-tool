@@ -83,12 +83,12 @@ menu.addEventListener('click', async e => {
         case '关于':
           document.querySelector('.about').style.display = 'block'
           document.querySelector('.about .dialog').style.display = 'block'
-          const aboutValue = document.querySelector('.about .dialog-content ul:last-child')
-          aboutValue.children[0].textContent = packageJson.description
-          aboutValue.children[1].textContent = packageJson.version
-          aboutValue.children[2].textContent = packageJson.author
-          aboutValue.children[3].textContent = EMAIL
-          aboutValue.children[4].textContent = GITHUB_URL
+          const aboutValue = document.querySelector('.about ul.dialog-content')
+          aboutValue.children[0].children[1].textContent = packageJson.description
+          aboutValue.children[1].children[1].textContent = packageJson.version
+          aboutValue.children[2].children[1].textContent = packageJson.author
+          aboutValue.children[3].children[1].textContent = EMAIL
+          aboutValue.children[4].children[1].textContent = GITHUB_URL
           // about.querySelector('.dialog-content ul:first-child').style.width = getComputedStyle(about.querySelector('.dialog-content ul:last-child')).width
           break
         default:
@@ -293,33 +293,20 @@ document.querySelector('.content .file-list .files').addEventListener('click', a
       case '详情':
         document.querySelector('.detail').style.display = 'block'
         document.querySelector('.detail .dialog').style.display = 'block'
-        const dialogContent1 = document.querySelector('.detail .dialog-content ul:first-child')
-        const dialogContent2 = document.querySelector('.detail .dialog-content ul:last-child')
-        dialogContent2.children[0].textContent = fileLine.children[0].textContent
-        dialogContent2.children[1].textContent = fileLine.children[1].textContent
-        /* if (fileLine.children[2].textContent) {
-          dialogContent2.children[2].textContent = fileLine.children[2].textContent
-          dialogContent2.children[2].style.color = '#000'
-          if (dialogContent1.querySelector('hashDetail')) {
-            dialogContent2.querySelector('hashDetail').textContent = fileLine.parentNode.parentNode.querySelector('.title span').textContent.replace('（', '').replace('）', '')
-          } else {
-            const nameDiv = document.createElement('li')
-            nameDiv.classList.add('hashDetail')
-            nameDiv.textContent = '哈希算法：'
-            dialogContent1.insertBefore(nameDiv, dialogContent1.children[2])
-            const valueDiv = document.createElement('li')
-            valueDiv.classList.add('hashDetail')
-            valueDiv.textContent = fileLine.parentNode.parentNode.querySelector('.title span').textContent.replace('（', '').replace('）', '')
-            dialogContent2.insertBefore(valueDiv, dialogContent2.children[2])
-          }
+        const detailValue = document.querySelector('.detail ul.dialog-content')
+        detailValue.children[0].children[1].textContent = fileLine.children[0].textContent
+        detailValue.children[1].children[1].textContent = fileLine.children[1].textContent
+        if (fileLine.children[2].textContent) {
+          detailValue.children[2].children[1].textContent = document.querySelector('.content .file-list .title span').textContent.replace('（', '').replace('）', '')
+          detailValue.children[2].children[1].style.color = '#000'
+          detailValue.children[3].children[1].textContent = fileLine.children[2].textContent
+          detailValue.children[3].children[1].style.color = '#000'
         } else {
-          if (dialogContent1.querySelector('hashDetail')) {
-            dialogContent1.querySelector('hashDetail').remove()
-            dialogContent2.querySelector('hashDetail').remove()
-          }
-          dialogContent2.children[2].textContent = '未计算哈希值'
-          dialogContent2.children[2].style.color = 'red'
-        } */
+          detailValue.children[2].children[1].textContent = '无'
+          detailValue.children[2].children[1].style.color = 'red'
+          detailValue.children[3].children[1].textContent = '未计算'
+          detailValue.children[3].children[1].style.color = 'red'
+        }
         break
       case '导出':
         const filePath = fileLine.children[0].textContent
@@ -359,13 +346,13 @@ api.onDownloadFile((filePath, downFile) => {
     if (line.children[2].textContent) {
       all += `文件路径：${line.children[0].textContent}\n文件名：${line.children[1].textContent}\n哈希算法：${algorithm}\n哈希值：${line.children[2].textContent}\n\n`
     } else {
-      all += `文件路径：${line.children[0].textContent}\n文件名：${line.children[1].textContent}\n哈希值：未计算\n\n`
+      all += `文件路径：${line.children[0].textContent}\n文件名：${line.children[1].textContent}\n哈希算法：无\n哈希值：未计算\n\n`
     }
     if (line.children[0].textContent === downFile) {
       if (line.children[2].textContent) {
         result = `文件路径：${line.children[0].textContent}\n文件名：${line.children[1].textContent}\n哈希算法：${algorithm}\n哈希值：${line.children[2].textContent}`
       } else {
-        result = `文件路径：${line.children[0].textContent}\n文件名：${line.children[1].textContent}\n哈希值：未计算`
+        result = `文件路径：${line.children[0].textContent}\n文件名：${line.children[1].textContent}\n哈希算法：无\n哈希值：未计算`
       }
     }
   })
@@ -440,7 +427,7 @@ document.querySelector('.check .hash-value .compare .pk').addEventListener('clic
     createMessage('warn', '目标哈希值不能为空')
     return
   }
-  if (origin === target) {
+  if (origin.trim() === target.trim()) {
     message.style.color = 'green'
     message.textContent = '哈希值相同'
     createMessage('right', '比较成功，哈希值相同')

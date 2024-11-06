@@ -74,26 +74,31 @@ textarea:focus-visible {
 }
 .dialog .close img:hover {
   border-radius: 50%;
-  background-color: #00000010;
+  background-color: rgba(0, 0, 0, 0.1);
 }
 .dialog .dialog-title {
   text-align: center;
 }
-.dialog .dialog-content {
+.dialog ul.dialog-content {
   display: flex;
+  flex-direction: column;
   margin: 15px 20px;
 }
-.dialog .dialog-content ul:first-child {
+.dialog .dialog-content li {
+  display: flex;
+  flex-wrap: nowrap;
+}
+.dialog .dialog-content li span {
+  line-height: 20px;
+}
+.dialog .dialog-content li span:first-child {
+  width: 80px;
   text-align: right;
   white-space: nowrap;
 }
-.dialog .dialog-content ul:last-child {
-  text-align: left;
-  white-space: nowrap;
-}
-.dialog .dialog-content ul li {
-  height: 20px;
-  line-height: 20px;
+.dialog .dialog-content li span:last-child {
+  flex: 1;
+  word-break: break-all;
 }
 
 @keyframes popup {

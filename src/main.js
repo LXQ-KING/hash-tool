@@ -99,7 +99,7 @@ const createWindow = () => {
     } else {
       e.sender.send('toggle-loading', true)
       const files = await Promise.all(filePaths.map(filePath => {
-        const content = fs.readFileSync(filePath, 'utf8')
+        const content = fs.readFileSync(filePath)
         const fileName = path.basename(filePath)
         return { filePath, fileName, content }
       }))
@@ -166,7 +166,7 @@ function readFolder(folderPath) {
       if (stats.isDirectory()) {
         readDirRecursive(fullPath)
       } else {
-        files.push({ filePath: fullPath, fileName: item, content: fs.readFileSync(fullPath, 'utf8') })
+        files.push({ filePath: fullPath, fileName: item, content: fs.readFileSync(fullPath) })
       }
     }))
   }

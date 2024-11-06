@@ -14,5 +14,5 @@ contextBridge.exposeInMainWorld('api', {
   sendDownloadContent: (filePath, data) => ipcRenderer.send('download-content',  filePath, data),
   onDownloadResponse: callback => ipcRenderer.on('download-file-result', (event, ifDownloaded) => callback(ifDownloaded)),
   onToggleLoading: callback => ipcRenderer.on('toggle-loading', (event, show) => callback(show)),
-  calculateHash: (algorithm, fileBuffer) => crypto.createHash(algorithm).update(fileBuffer).digest('hex')
+  calculateHash: (algorithm, fileBuffer) => crypto.createHash(algorithm).update(fileBuffer).digest('hex').toUpperCase()
 });

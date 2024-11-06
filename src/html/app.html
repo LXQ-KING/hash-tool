@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'">
   <title>哈希工具</title>
 
   <link rel="stylesheet" href="../css/base.css">
@@ -157,22 +158,13 @@
       <div class="dialog-title">
         <img src="../assets/images/favicon.png" alt="LOGO">
       </div>
-      <div class="dialog-content">
-        <ul>
-          <li>软件名称：</li>
-          <li>版本号：</li>
-          <li>作者：</li>
-          <li>邮箱：</li>
-          <li>GitHub仓库：</li>
-        </ul>
-        <ul>
-          <li>哈希工具</li>
-          <li>1.0.0</li>
-          <li>LXQ</li>
-          <li></li>
-          <li class="github"></li>
-        </ul>
-      </div>
+      <ul class="dialog-content">
+        <li><span>软件名称：</span><span></span></li>
+        <li><span>版本号：</span><span></span></li>
+        <li><span>作者：</span><span></span></li>
+        <li><span>邮箱：</span><span></span></li>
+        <li><span>GitHub仓库：</span><span class="github"></span></li>
+      </ul>
     </div>
   </div>
   <!-- 详情弹窗 -->
@@ -182,18 +174,12 @@
         <img src="../assets/images/close.png" alt="关闭">
       </div>
       <div class="dialog-title">详情</div>
-        <div class="dialog-content">
-          <ul>
-            <li>文件路径：</li>
-            <li>文件名：</li>
-            <li>哈希值：</li>
-          </ul>
-          <ul>
-            <li>C:\Users\Administrator\Desktop\test.txt</li>
-            <li>test.txt</li>
-            <li>437e701566d8fa8933aa03759b40f312716ec014ce03a7b17b7c6e8ab5775ddc</li>
-          </ul>
-        </div>
+      <ul class="dialog-content">
+        <li><span>文件路径：</span><span>C:\Users\Administrator\Desktop\test.txt</span></li>
+        <li><span>文件名：</span><span>test.txt</span></li>
+        <li><span>哈希算法：</span><span>无</span></li>
+        <li><span>哈希值：</span><span>437e701566d8fa8933aa03759b40f312716ec014ce03a7b17b7c6e8ab5775ddc</span></li>
+      </ul>
     </div>
   </div>
   <!-- 消息提示框 -->
