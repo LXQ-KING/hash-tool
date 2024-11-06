@@ -4,3 +4,6 @@
 
 # NPM directories and files
 node_modules
+
+# ELECTRON-BUILDER directories and files
+build

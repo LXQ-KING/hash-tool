@@ -15,7 +15,7 @@
       "**/*"
     ],
     "directories": {
-      "output": "dist"
+      "output": "build"
     },
     "win": {
       "target": "portable",
