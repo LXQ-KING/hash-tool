@@ -51,16 +51,24 @@
 npm install
 // 根据package.json文件安装所需依赖
 // electron：开源框架，构建跨平台的桌面应用程序
-// electron-reloader：热加载模块
-// electron-builder：打包模块
+// electron-reloader：electron热加载模块
+// electron-builder：elecctron打包模块
+// webpack：项目打包模块
+// webpack-cli：webpack命令行互动模块
+// copy-webpack-plugin：项目到webpack构建目录的复制模块
+// html-minimizer-webpack-plugin：HTML代码压缩模块
+// css-minimizer-webpack-plugin：CSS代码压缩模块
+// terser-webpack-plugin：注释模块
 ~~~
 
 ### 执行命令
 
 ~~~javascript
-npm start
-// npm run start
+npm run start
 // 启动应用程序
+
+npm run serve
+// 打包项目代码
 
 npm run build
 // 打包应用程序

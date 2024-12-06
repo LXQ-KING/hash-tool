@@ -2,17 +2,18 @@
   "name": "hash-tool",
   "version": "1.0.0",
   "description": "哈希工具",
-  "main": "src/main.js",
+  "main": "dist/main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron .",
+    "start": "electron ./dist/main.js",
+    "serve": "webpack",
     "build": "electron-builder"
   },
   "build": {
     "appId": "com.example.hash-tool",
     "productName": "hash-tool",
     "files": [
-      "**/*"
+      "dist/**/*"
     ],
     "directories": {
       "output": "build"
@@ -43,8 +44,14 @@
   "author": "LXQ",
   "license": "ISC",
   "devDependencies": {
+    "copy-webpack-plugin": "^12.0.2",
+    "css-minimizer-webpack-plugin": "^7.0.0",
     "electron": "^33.0.2",
     "electron-builder": "^25.1.8",
-    "electron-reloader": "^1.2.3"
+    "electron-reloader": "^1.2.3",
+    "html-minimizer-webpack-plugin": "^5.0.0",
+    "terser-webpack-plugin": "^5.3.10",
+    "webpack": "^5.97.1",
+    "webpack-cli": "^5.1.4"
   }
 }
